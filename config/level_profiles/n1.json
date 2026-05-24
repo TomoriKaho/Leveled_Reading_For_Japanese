@@ -1,0 +1,22 @@
+{
+  "level": "N1",
+  "description": "Advanced learner profile. Treat the level as an upper bound, not a demand to make simple prose harder.",
+  "max_sentence_chars": 80,
+  "preferred_sentence_chars": [32, 72],
+  "grammar_preferred": [],
+  "grammar_avoid": [],
+  "replace_terms": {},
+  "annotation_terms": {
+    "鎌倉": {
+      "reading": "かまくら",
+      "explanation": "神奈川県にある町の名前。",
+      "reason": "place_name",
+      "level_estimate": "proper noun"
+    }
+  },
+  "allow_out_of_level_if": ["proper_noun", "cultural_term", "theme_keyword", "repeated_core_term", "character_title"],
+  "max_notes_per_500_chars": 2,
+  "preserve_literary_tone": true,
+  "do_not_make_childish": true
+}
+

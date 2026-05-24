@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leveled-reading-for-japanese"
+version = "0.1.0"
+description = "Story-aware graded adaptation pipeline for Japanese literary texts."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+openai = ["openai>=1.40.0"]
+
+[project.scripts]
+sagap = "leveled_reading.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

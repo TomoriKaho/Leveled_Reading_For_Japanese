@@ -1,0 +1,11 @@
+{
+  "source_path": "samples/kokoro_excerpt.txt",
+  "title": "kokoro_excerpt",
+  "target_level": "N3",
+  "provider": "mock",
+  "model": "deterministic-mock",
+  "scene_count": 1,
+  "adaptation_count": 1,
+  "validation_passed": 1,
+  "validation_total": 1
+}
