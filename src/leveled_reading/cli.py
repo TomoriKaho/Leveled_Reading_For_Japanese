@@ -17,7 +17,7 @@ def main() -> None:
     adapt.add_argument("--level", default="N3", help="Target level profile, e.g. N1, N2, N3, N4, N5.")
     adapt.add_argument("--title", default=None, help="Output title. Defaults to input file stem.")
     adapt.add_argument("--output", default=None, help="Output directory. Defaults to SAGAP_OUTPUT_DIR/<input>-<level>.")
-    adapt.add_argument("--provider", default=None, choices=["mock", "openai"], help="Override SAGAP_LLM_PROVIDER.")
+    adapt.add_argument("--provider", default=None, choices=["mock", "api"], help="Override SAGAP_LLM_PROVIDER.")
     adapt.add_argument("--env", default=".env", help="Path to .env file.")
     adapt.add_argument("--max-scene-chars", type=int, default=2500, help="Maximum source chars per scene chunk.")
     adapt.add_argument("--max-revisions", type=int, default=1, help="Automatic revision attempts per scene.")
@@ -56,4 +56,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

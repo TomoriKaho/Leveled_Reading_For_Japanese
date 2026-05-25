@@ -2,25 +2,25 @@ from __future__ import annotations
 
 import json
 import re
+import urllib.error
+import urllib.request
 from typing import Any
 
 from ..config import Settings
 from ..models import AdaptationResult, Annotation, LevelProfile, SceneChunk, ScenePlan, StoryBible, ValidationIssue, to_dict
 
 
-class OpenAILLMClient:
-    provider_name = "openai"
+class APILLMClient:
+    provider_name = "api"
 
     def __init__(self, settings: Settings):
-        if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY is required when SAGAP_LLM_PROVIDER=openai")
-        try:
-            from openai import OpenAI
-        except ImportError as exc:
-            raise ImportError("Install the OpenAI dependency with: pip install -e '.[openai]'") from exc
-
-        self.client = OpenAI(api_key=settings.openai_api_key)
-        self.model_name = settings.openai_model
+        if not settings.llm_api_key:
+            raise ValueError("SAGAP_LLM_API_KEY is required when SAGAP_LLM_PROVIDER=api")
+        if not settings.llm_base_url:
+            raise ValueError("SAGAP_LLM_BASE_URL is required when SAGAP_LLM_PROVIDER=api")
+        self.api_key = settings.llm_api_key
+        self.base_url = settings.llm_base_url.rstrip("/")
+        self.model_name = settings.llm_model
         self.temperature = settings.temperature
         self.max_output_tokens = settings.max_output_tokens
 
@@ -136,16 +136,42 @@ class OpenAILLMClient:
             "Return a single valid JSON object. Do not wrap it in Markdown.\n\n"
             f"{json.dumps(payload, ensure_ascii=False, indent=2)}"
         )
-        response = self.client.responses.create(
-            model=self.model_name,
-            input=prompt,
-            temperature=self.temperature,
-            max_output_tokens=self.max_output_tokens,
-        )
-        text = getattr(response, "output_text", None)
-        if not text:
-            text = str(response)
+        text = self._post_chat_completion(prompt)
         return _parse_json_object(text)
+
+    def _post_chat_completion(self, prompt: str) -> str:
+        body = {
+            "model": self.model_name,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a careful JSON-only assistant.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": self.temperature,
+            "max_tokens": self.max_output_tokens,
+        }
+        request = urllib.request.Request(
+            url=f"{self.base_url}/chat/completions",
+            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            error_body = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"LLM API request failed with HTTP {exc.code}: {error_body}") from exc
+
+        try:
+            return data["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise RuntimeError(f"Unexpected LLM API response shape: {json.dumps(data, ensure_ascii=False)[:1000]}") from exc
 
 
 def _parse_json_object(text: str) -> dict[str, Any]:
@@ -182,4 +208,3 @@ def _adaptation_from_json(scene_id: str, target_level: str, data: dict[str, Any]
         annotations=annotations,
         edit_notes=list(data.get("edit_notes", [])),
     )
-

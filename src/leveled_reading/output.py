@@ -62,7 +62,7 @@ def _render_markdown(result: PipelineResult, profile: LevelProfile) -> str:
 
 def _manifest(result: PipelineResult, source_path: str | Path, profile: LevelProfile, settings: Settings) -> dict:
     actual_provider = result.costs[0].provider if result.costs else settings.provider
-    actual_model = result.costs[0].model if result.costs else settings.openai_model
+    actual_model = result.costs[0].model if result.costs else settings.llm_model
     return {
         "source_path": str(source_path),
         "title": result.story_bible.title,

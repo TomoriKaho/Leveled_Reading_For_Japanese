@@ -7,7 +7,7 @@
 
 这个项目的目标不是简单调用 LLM 说“请改成 N3”，而是把日语长篇文学改编拆成可控制、可验证、可复现的多个步骤：分段、故事信息维护、场景改编计划、分级改写、注释、validation、局部修正和实验数据输出。
 
-当前版本是 MVP，默认支持 `mock` 模式，不需要 API key 也能跑通完整流程；需要真实模型时可切换到 `openai` provider。
+当前版本是 MVP，默认支持 `mock` 模式，不需要 API key 也能跑通完整流程；需要真实模型时可切换到通用 `api` provider。
 
 ## 核心思想
 
@@ -67,8 +67,9 @@ cp .env.example .env
 
 ```env
 SAGAP_LLM_PROVIDER=mock
-OPENAI_API_KEY=
-SAGAP_OPENAI_MODEL=gpt-4.1-mini
+SAGAP_LLM_API_KEY=
+SAGAP_LLM_MODEL=gpt-4.1-mini
+SAGAP_LLM_BASE_URL=
 SAGAP_OUTPUT_DIR=outputs
 SAGAP_TEMPERATURE=0.2
 SAGAP_MAX_OUTPUT_TOKENS=4096
@@ -78,9 +79,10 @@ SAGAP_MAX_OUTPUT_TOKENS=4096
 
 | 变量 | 作用 |
 |---|---|
-| `SAGAP_LLM_PROVIDER` | `mock` 或 `openai` |
-| `OPENAI_API_KEY` | OpenAI API key，仅 `openai` 模式需要 |
-| `SAGAP_OPENAI_MODEL` | 使用的模型名 |
+| `SAGAP_LLM_PROVIDER` | `mock` 或 `api` |
+| `SAGAP_LLM_API_KEY` | 模型服务 API key，仅 `api` 模式需要 |
+| `SAGAP_LLM_MODEL` | 使用的模型名 |
+| `SAGAP_LLM_BASE_URL` | Chat Completions 兼容接口的 base URL，仅 `api` 模式需要 |
 | `SAGAP_OUTPUT_DIR` | 默认输出目录 |
 | `SAGAP_TEMPERATURE` | 生成温度 |
 | `SAGAP_MAX_OUTPUT_TOKENS` | 单次输出 token 上限 |
@@ -95,12 +97,6 @@ SAGAP_MAX_OUTPUT_TOKENS=4096
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
-```
-
-如果要使用 OpenAI provider：
-
-```bash
-pip install -e ".[openai]"
 ```
 
 不安装也可以用 `PYTHONPATH=src` 直接运行。
@@ -132,29 +128,26 @@ sagap adapt \
 PYTHONPATH=src python -m leveled_reading.cli profiles --level N3
 ```
 
-## 使用 OpenAI provider
+## 使用 API provider
 
-1. 安装可选依赖：
+`api` provider 使用标准库 HTTP 请求，不需要额外安装 SDK。它要求目标服务提供 Chat Completions 兼容接口。
 
-```bash
-pip install -e ".[openai]"
-```
-
-2. 修改 `.env`：
+1. 修改 `.env`：
 
 ```env
-SAGAP_LLM_PROVIDER=openai
-OPENAI_API_KEY=你的 API key
-SAGAP_OPENAI_MODEL=你要使用的模型
+SAGAP_LLM_PROVIDER=api
+SAGAP_LLM_API_KEY=你的 API key
+SAGAP_LLM_MODEL=你要使用的模型
+SAGAP_LLM_BASE_URL=https://你的模型服务/v1
 ```
 
-3. 运行：
+2. 运行：
 
 ```bash
 sagap adapt \
   --input samples/kokoro_excerpt.txt \
   --level N3 \
-  --output outputs/kokoro-n3-openai
+  --output outputs/kokoro-n3-api
 ```
 
 也可以临时覆盖 provider：
@@ -163,7 +156,7 @@ sagap adapt \
 sagap adapt \
   --input samples/kokoro_excerpt.txt \
   --level N3 \
-  --provider openai
+  --provider api
 ```
 
 ## 输出文件
@@ -333,7 +326,7 @@ write_outputs
 - scene chunking 仍是规则切分，尚未加入 LLM 边界判断；
 - 词汇和语法 profile 只是示例，需要结合真实参考词库扩展；
 - validation 是启发式指标，不等于人工评价；
-- token 成本是粗略估计，OpenAI 实际费用应以 API 返回和官方价格为准；
+- token 成本是粗略估计，实际费用应以所使用模型服务的 API 返回和官方价格为准；
 - 忠实性验证目前只做压缩率和关键词覆盖，后续应加入 QA-based fidelity。
 
 ## 后续扩展建议
@@ -371,4 +364,3 @@ write_outputs
 这样可以把论文重点放在：
 
 > LLM 本身不是创新点，带有日语教育约束、文学性约束和验证闭环的流水线设计才是创新点。
-

@@ -15,8 +15,9 @@ DEFAULT_PROFILE_DIR = ROOT / "config" / "level_profiles"
 @dataclass
 class Settings:
     provider: str = "mock"
-    openai_api_key: str | None = None
-    openai_model: str = "gpt-4.1-mini"
+    llm_api_key: str | None = None
+    llm_model: str = "gpt-4.1-mini"
+    llm_base_url: str | None = None
     output_dir: str = "outputs"
     temperature: float = 0.2
     max_output_tokens: int = 4096
@@ -41,8 +42,9 @@ def load_settings(env_path: str | Path = ".env") -> Settings:
     load_env_file(env_path)
     return Settings(
         provider=os.getenv("SAGAP_LLM_PROVIDER", "mock").strip().lower(),
-        openai_api_key=os.getenv("OPENAI_API_KEY") or None,
-        openai_model=os.getenv("SAGAP_OPENAI_MODEL", "gpt-4.1-mini"),
+        llm_api_key=os.getenv("SAGAP_LLM_API_KEY") or None,
+        llm_model=os.getenv("SAGAP_LLM_MODEL", "gpt-4.1-mini"),
+        llm_base_url=os.getenv("SAGAP_LLM_BASE_URL") or None,
         output_dir=os.getenv("SAGAP_OUTPUT_DIR", "outputs"),
         temperature=float(os.getenv("SAGAP_TEMPERATURE", "0.2")),
         max_output_tokens=int(os.getenv("SAGAP_MAX_OUTPUT_TOKENS", "4096")),
@@ -57,4 +59,3 @@ def load_level_profile(level: str, profile_dir: str | Path = DEFAULT_PROFILE_DIR
         raise FileNotFoundError(f"Level profile not found: {path}. Available: {', '.join(available)}")
     data = json.loads(path.read_text(encoding="utf-8"))
     return LevelProfile.from_dict(data)
-

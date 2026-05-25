@@ -10,12 +10,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
-[project.optional-dependencies]
-openai = ["openai>=1.40.0"]
-
 [project.scripts]
 sagap = "leveled_reading.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
