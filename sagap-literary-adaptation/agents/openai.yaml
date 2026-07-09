@@ -1,0 +1,8 @@
+interface:
+  display_name: "SAGAP Literary Adaptation"
+  short_description: "Japanese literary graded adaptation"
+  default_prompt: "Use $sagap-literary-adaptation to adapt this Japanese literary scene into a leveled reader with Story Bible, Reader Profile, annotations, and evaluation notes."
+
+policy:
+  allow_implicit_invocation: true
+

@@ -1,0 +1,17 @@
+{
+  "work": {
+    "title": "",
+    "author": "",
+    "narrative_voice": "",
+    "style_notes": []
+  },
+  "characters": {},
+  "terms": {},
+  "timeline": [],
+  "global_constraints": [
+    "Do not summarize the scene into a plot outline.",
+    "Do not explain literary ambiguity as a single fixed interpretation.",
+    "Do not reveal future information early."
+  ]
+}
+
